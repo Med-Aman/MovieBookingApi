@@ -2,6 +2,7 @@ package com.example
 
 import com.example.models.*
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.core.spec.style.StringSpec
@@ -12,11 +13,13 @@ import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
 
 @MicronautTest
-class HelloWorldTest(
+class MovieBookingControllerTest(
     @Client("/") private val client: HttpClient
 ) : StringSpec({
     val jsonObj = jacksonObjectMapper()
-    val mapper = ObjectMapper()
+    val mapper = ObjectMapper().registerModule(
+        KotlinModule(nullIsSameAsDefault = true)
+    )
 
     "should greet" {
         val response = client.toBlocking().retrieve("/say-hello/name")
@@ -34,6 +37,42 @@ class HelloWorldTest(
             Movie(5, "Superman"),
         )
         actualMovieList shouldBe expectedMovieList
+    }
+
+    "should return filtered theater list based on movie choice" {
+        val response = client.toBlocking().retrieve("/movie/5")
+        val actualResponse: List<Theater> = jsonObj.readValue(response)
+        val expected = listOf(
+            Theater(
+                theaterId = 1, name = "Inox",
+                screen = listOf(
+                    Screen(
+                        id = 1, showList = listOf()
+                    ),
+                    Screen(
+                        id = 2,
+                        showList = listOf(
+                            Show(2, "1 PM", movieId = 5, 200),
+                        )
+                    )
+                )
+            ),
+            Theater(
+                theaterId = 2, name = "PVR",
+                screen = listOf(
+                    Screen(
+                        id = 1, showList = listOf()
+                    ),
+                    Screen(
+                        id = 2,
+                        showList = listOf(
+                            Show(1, "10 AM", movieId = 5, 160),
+                        )
+                    )
+                )
+            )
+        )
+        actualResponse shouldBe expected
     }
 
     "should return movie" {

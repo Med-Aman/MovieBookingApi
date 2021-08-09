@@ -1,6 +1,5 @@
 package com.example.models
 
-
 data class Ticket(
     val movieName: String,
     val theaterName: String,
