@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class Repository {
-    val movieList: List<Movie> = listOf(
+    val movieList: MutableList<Movie> = mutableListOf(
         Movie(1, "Avengers"),
         Movie(2, "Thor"),
         Movie(3, "Dhoom"),
@@ -16,7 +16,7 @@ class Repository {
         Movie(5, "Superman"),
     )
 
-    fun theaterList() = listOf(
+    val theaterList = mutableListOf(
         Theater(
             theaterId = 1, name = "Inox",
             screen = listOf(
@@ -62,11 +62,11 @@ class Repository {
     )
 
     fun getTheaterName(theaterId: Int): String {
-        return theaterList().find { it.theaterId == theaterId }?.name ?: "Not Found"
+        return theaterList.find { it.theaterId == theaterId }?.name ?: "Not Found"
     }
 
     fun getTheaterId(theaterName: String): Int {
-        return theaterList().find { it.name.equals(theaterName, true) }?.theaterId ?: 0
+        return theaterList.find { it.name.equals(theaterName, true) }?.theaterId ?: 0
     }
 
     fun getMovieName(id: Int): String {
@@ -78,23 +78,23 @@ class Repository {
     }
 
     fun getScreenId(theaterId: Int, movieId: Int, showId: Int): Int {
-        return theaterList().filter { it.theaterId == theaterId }.flatMap { it.screen }
+        return theaterList.filter { it.theaterId == theaterId }.flatMap { it.screen }
             .find { Screen -> Screen.showList.firstOrNull { it.id == showId && it.movieId == movieId } != null }?.id
             ?: 0
     }
 
     fun getShowList(theaterId: Int, movieId: Int): List<Show> {
-        return theaterList().filter { it.theaterId == theaterId }.flatMap { it.screen }.flatMap { it.showList }
+        return theaterList.filter { it.theaterId == theaterId }.flatMap { it.screen }.flatMap { it.showList }
             .filter { it.movieId == movieId }
     }
 
     fun getShowTime(theaterId: Int, showId: Int): String {
-        return (theaterList().filter { it.theaterId == theaterId }).flatMap { it.screen }.flatMap { it.showList }
+        return (theaterList.filter { it.theaterId == theaterId }).flatMap { it.screen }.flatMap { it.showList }
             .find { it.id == showId }?.time ?: "Invalid Id"
     }
 
     fun getShowPrice(theaterId: Int, showId: Int): Int {
-        return (theaterList().filter { it.theaterId == theaterId }).flatMap { it.screen }.flatMap { it.showList }
+        return (theaterList.filter { it.theaterId == theaterId }).flatMap { it.screen }.flatMap { it.showList }
             .find { it.id == showId }?.price ?: 0
     }
 }

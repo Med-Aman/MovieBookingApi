@@ -20,7 +20,7 @@ class MovieBookingController(@Inject val repository: Repository) {
     fun getMovieList(): String? = obj.writeValueAsString(repository.movieList)
 
     @Get("/movie/{movieId}")
-    fun getTheater(@PathVariable movieId: Int): List<Theater> = repository.theaterList().map { theater ->
+    fun getTheater(@PathVariable movieId: Int): List<Theater> = repository.theaterList.map { theater ->
         theater.copy(
             screen = theater.screen.map { screen ->
                 screen.copy(showList = screen.showList.filter { it.movieId == movieId })
@@ -36,7 +36,7 @@ class MovieBookingController(@Inject val repository: Repository) {
     fun getShowDetails(
         @PathVariable movieId: Int,
         @PathVariable theaterId: Int
-    ): List<Show> = (repository.theaterList().filter { it.theaterId == theaterId })
+    ): List<Show> = (repository.theaterList.filter { it.theaterId == theaterId })
         .flatMap { it.screen }
         .flatMap { it.showList }
         .filter { it.movieId == movieId }
@@ -44,7 +44,7 @@ class MovieBookingController(@Inject val repository: Repository) {
     @Get("/theater")
     fun getMovieListByTheater(
         @QueryValue theatername: String
-    ): List<Theater> = repository.theaterList().filter { it.name.equals(theatername, ignoreCase = true) }
+    ): List<Theater> = repository.theaterList.filter { it.name.equals(theatername, ignoreCase = true) }
 
     @Get("/book-ticket")
     fun getBookingDetails(
@@ -69,6 +69,15 @@ class MovieBookingController(@Inject val repository: Repository) {
     fun addMovie(
         @Body m1: Movie
     ): String {
-        return "You have added ${m1.name} with ${m1.id}"
+        repository.movieList.add(m1)
+        return "Successfully added ${m1.name}"
+    }
+
+    @Post("/add-theater")
+    fun addMovie(
+        @Body t1: Theater
+    ): String {
+        repository.theaterList.add(t1)
+        return "Successfully added ${t1.name}"
     }
 }

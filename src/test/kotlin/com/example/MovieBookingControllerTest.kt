@@ -81,7 +81,7 @@ class MovieBookingControllerTest(
         movie shouldBe Movie(1, "Avengers")
     }
 
-    "should return List of shows" {
+    "should return List of shows when movie id and theater id are params" {
         val response = client.toBlocking().retrieve("/movie/1/1")
         val actualResponse: List<Show> = jsonObj.readValue(response)
         val expectedResponse = listOf(
@@ -120,13 +120,38 @@ class MovieBookingControllerTest(
         actualResponse shouldBe expectedResponse
     }
 
-    "should return a movie" {
+    "should add a movie" {
         val payLoad = mapper.writeValueAsString(Movie(1, "XYZ"))
         val res = client.toBlocking().retrieve(HttpRequest.POST("/add-movie", payLoad))
-        res shouldBe "You have added XYZ with 1"
+        res shouldBe "Successfully added XYZ"
     }
 
-    "should return a ticket instancee" {
+    "should add a Theater" {
+        val payLoad = mapper.writeValueAsString(
+            Theater(
+                theaterId = 1, name = "SRS",
+                screen = listOf(
+                    Screen(
+                        id = 1,
+                        showList = listOf(
+                            Show(1, "9 AM", movieId = 1, 160),
+                        )
+                    ),
+                    Screen(
+                        id = 2,
+                        showList = listOf(
+                            Show(1, "10 AM", movieId = 4, 160),
+                        )
+                    )
+                )
+            )
+        )
+        val res = client.toBlocking().retrieve(HttpRequest.POST("/add-theater", payLoad))
+
+        res shouldBe "Successfully added SRS"
+    }
+
+    "should return a ticket instance" {
         val response = client.toBlocking().retrieve("/book-ticket?movie=Avengers&theater=Inox&show=1")
         val actualResponse: Ticket = jsonObj.readValue(response)
         actualResponse shouldBe Ticket("Avengers", "Inox", "9 AM", 1, 160)
